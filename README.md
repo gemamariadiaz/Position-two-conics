@@ -9,5 +9,5 @@ G. M. Díaz et al., *Relative position of a parabola or a hyperbola and an ellip
 ## Files
 - `parabcircPublic.txt`: Maple code for determining the relative position between an ellipse and a parabola.
 - `hypercircPublic.txt`: Maple code for determining the relative position between an ellipse and a hyperbola.
-- `parab_parabolaPublic.mw`: examples illustrating the use parabcircPublic.txt
-- `parab_hipPublic.mw`: examples illustrating the use hypercircPublic.txt
+- `parab_parabolaPublic.mw`: examples illustrating the use of parabcircPublic.txt
+- `parab_hipPublic.mw`: examples illustrating the use of hypercircPublic.txt
