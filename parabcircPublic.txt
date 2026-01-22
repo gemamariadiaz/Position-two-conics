@@ -1,0 +1,134 @@
+
+## Maple script
+## Main procedure: 
+	### testar_G	
+	### input: ellipse,parabola,x,y,epsilon
+	### output: relative position of both conics, according to Theorem 8.
+	### Example:
+	### testar_G(subs( xc=-1/2,yc=11/2,delta=  5/2*sqrt(5),dcirculo ),subs(a=2,p) ,x,y,10^(-5));
+	###				"9, one intersection points, one interior tangent "
+
+
+
+with(LinearAlgebra): 
+
+######################
+######################
+matriz_conica:=proc(conica,x,y) local a0,a1,a2,a3,a4,a5 ,M;
+description "return the matrix M that defines the conic";
+a0:=coeff(conica,x,2); 
+a2:=coeff(conica,y,2); 
+a5:=subs(x=0,y=0,conica); 
+a1:=coeff(coeff(conica,x,1),y,1)/2; 
+a3:=coeff(coeff(conica,x,1),y,0)/2; 
+a4:=coeff(coeff(conica,y,1),x,0)/2; 
+M:=Matrix(3, 3, {(1, 1) = a0, (1, 2) = a1, (1, 3) = a3, (2, 2) = a2, (2, 3) = a4, (3, 3) = a5}, storage = triangular[upper], shape = [symmetric]);
+ 
+return  M;
+end:
+
+
+######################
+######################
+
+
+signo:=proc(a, epsilon)
+description "sign of a";
+if abs(evalf(a))<=epsilon then return(0);
+	else 
+	return(sign(evalf(a)));
+fi;
+end:
+
+
+######################
+######################
+
+  
+
+testar_G:=proc(elipse,parabola,x,y,epsilon) local elips, a0,a1,a2,a3,a4,a5,b0,b1,b2,b3,b4,b5,M,N,M2,N2,L0,L1,L2,L3,T,F,I1,I2,I3,I4,I5,I6,T1,T2,sL0,sL1,sL2,sL3,sI1,sI2,sI3,sI4,sI5,sI6,sT1;
+description "given an ellipse and a parabola, return their relative position following Theorem ";
+
+ 
+a0:=simplify(coeff(elipse,x,2)); 
+a2:=simplify(coeff(elipse,y,2));
+
+if signo(a0,epsilon)=-1 and signo(a2,epsilon)=-1 then elips:=-elipse; else elips:=elipse;fi;
+
+a0:=simplify(coeff(elips,x,2)); 
+a2:=simplify(coeff(elips,y,2));
+
+
+if signo(a0,epsilon)=-1 or signo(a2,epsilon)=-1 then WARNING("hypotheses are not verified");fi;
+
+M:=matriz_conica(elips,x,y);  
+N:=matriz_conica(parabola,x,y);  
+M2:=SubMatrix(M,1..2,1..2);
+N2:=SubMatrix(N,1..2,1..2);
+
+
+
+
+F:=collect(Determinant(lambda*N+M),lambda): 
+L0:=coeff(F,lambda,3);
+L1:=coeff(F,lambda,2);
+L2:=coeff(F,lambda,1);
+L3:=coeff(F,lambda,0);
+
+
+T1:=Determinant(M2); 
+sT1:=signo(evalf(T1),epsilon);
+ 
+
+T:=simplify(T1*Trace(MatrixInverse(M2).N2));
+
+sL0:=signo(evalf(L0),epsilon);
+sL1:=signo(evalf(L1),epsilon);
+sL2:=signo(evalf(L2),epsilon);
+sL3:=signo(evalf(L3),epsilon);
+
+ 
+
+if not (a0>0 and a2>0 and sT1>0 and sL3<0 and sL0<0) then WARNING("hypotheses are not verified");fi;
+
+
+I1:=discrim(F,lambda):
+I6:=discrim(diff(F,lambda),lambda):
+I2:=L3*T^3 - T1^3*L0;
+I3:=-L0*T1^3 -L2*T^2*T1+L1*T1^2*T+L3*T^3:I4:= 3*L0*T1^2 +L2*T^2 -2*L1*T1*T:
+I5 := -3*L0*T1 + L1*T:
+
+sI1:=signo(evalf(I1),epsilon);
+sI2:=signo(evalf(I2),epsilon);
+sI3:=signo(evalf(I3),epsilon);
+sI4:=signo(evalf(I4),epsilon);
+sI5:=signo(evalf(I5),epsilon);
+sI6:=signo(evalf(I6),epsilon);
+
+
+
+
+if sI1=0 then 
+	if sL1>0 or sL2>0 then print("2, exteriorly tangent");
+	elif sL1<0 and sL2<0 and sI3<0 and sI5>0  then print("7, one interior point tangent");# a^2\=delta ::I2\=0; abs(I2)>epsilon
+	elif sL1<0 and sL2<0 and sI3<0 and sI4>0  then print("7, one interior point tangent");# a^2\=delta ::I2\=0; abs(I2)>epsilon
+	elif sL1<0 and sL2<0 and sI3=0 and sI5>0 and sI4<0 then print("7, one interior point tangent");
+	elif sI3=0 and sI5=0 and sI4=0 then print("7, one interior point tangent");
+	elif sI3=0  and sI4=0 and sI5<0  then print("8, two interior tangent points "); 	elif sI2<=0 and sI4<0 and sI5<0 and sI6<>0 then print("6, two intersection points, one interior tangent ");# a^2<=delta::I2<=0
+	elif sI3=0 and sI4=0 and sI5>0 then print("3, ellipse inside parabola");
+	elif sI3<0 and sI5<0 and sI6=0 then print("9, one intersection points, one interior tangent ");
+	fi:
+elif sI1>0 then
+	if sL1<0 and sL2<0 and sI4>0 then print("3, ellipse inside parabola");
+	elif sL1<0 and sL2<0 and sI5>=0 and sI4<=0 and sI3<0 then print("3, ellipse inside parabola");
+	elif sL1<0 and sL2<0 and sI5>0 and sI4<0 and sI3=0 then print("3, ellipse inside parabola");
+        elif sL1>0 or sL2>0 then print("1, ellipse and parabola separated ");
+	elif sI4<0 and sI5<0 then print("5, four intersection points");
+	fi:
+elif sI1<0 then print("4, two intersection points");
+
+fi;
+
+ end:
+
+
